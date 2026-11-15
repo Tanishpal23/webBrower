@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aeris Search</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #202124;
+            --subtext-color: #5f6368;
+            --input-bg: #ffffff;
+            --input-border: #dfe1e5;
+            --input-hover: #ffffff;
+            --input-shadow: rgba(32, 33, 36, 0.28);
+            --card-bg: #f8f9fa;
+            --card-hover: #f1f3f4;
+            --accent-color: #1a73e8;
+            --accent-hover: #174ea6;
+            --suggestion-hover: #f1f3f4;
+            --badge-bg: #e8f0fe;
+            --badge-text: #1967d2;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #202124;
+                --text-color: #e8eaed;
+                --subtext-color: #9aa0a6;
+                --input-bg: #303134;
+                --input-border: #5f6368;
+                --input-hover: #303134;
+                --input-shadow: rgba(0, 0, 0, 0.45);
+                --card-bg: #303134;
+                --card-hover: #3c4043;
+                --accent-color: #8ab4f8;
+                --accent-hover: #aecbfa;
+                --suggestion-hover: #3c4043;
+                --badge-bg: #1e3a5f;
+                --badge-text: #8ab4f8;
+            }
+        }
+
+        body.dark-mode {
+            --bg-color: #202124;
+            --text-color: #e8eaed;
+            --subtext-color: #9aa0a6;
+            --input-bg: #303134;
+            --input-border: #5f6368;
+            --input-hover: #303134;
+            --input-shadow: rgba(0, 0, 0, 0.45);
+            --card-bg: #303134;
+            --card-hover: #3c4043;
+            --accent-color: #8ab4f8;
+            --accent-hover: #aecbfa;
+            --suggestion-hover: #3c4043;
+            --badge-bg: #1e3a5f;
+            --badge-text: #8ab4f8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 24px 32px 12px 32px;
+            gap: 16px;
+        }
+
+        .header-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background-color 0.15s;
+        }
+
+        .header-link:hover {
+            background-color: var(--card-hover);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--input-border);
+            color: var(--text-color);
+            padding: 6px 12px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 680px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 20px;
+            margin-top: -15px;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 28px;
+            user-select: none;
+        }
+
+        .logo-text {
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-blue { color: #4285f4; }
+        .logo-red { color: #ea4335; }
+        .logo-yellow { color: #fbbc05; }
+        .logo-green { color: #34a853; }
+
+        .logo-sub {
+            font-size: 14px;
+            color: var(--subtext-color);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-pill {
+            background: var(--badge-bg);
+            color: var(--badge-text);
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 48px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 24px;
+            padding: 0 16px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .search-box:hover, .search-box:focus-within {
+            box-shadow: 0 1px 6px var(--input-shadow);
+            border-color: transparent;
+        }
+
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--subtext-color);
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .clear-icon {
+            cursor: pointer;
+            display: none;
+            width: 20px;
+            height: 20px;
+            fill: var(--subtext-color);
+            margin-left: 8px;
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 52px;
+            left: 0;
+            right: 0;
+            background: var(--input-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px var(--input-shadow);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            border: 1px solid var(--input-border);
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 18px;
+            font-size: 15px;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--suggestion-hover);
+        }
+
+        .suggestion-item svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--subtext-color);
+            margin-right: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid transparent;
+            padding: 10px 18px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .btn:hover {
+            border-color: var(--input-border);
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 40px;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .shortcuts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .shortcut-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 14px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: background-color 0.15s;
+        }
+
+        .shortcut-card:hover {
+            background-color: var(--card-hover);
+        }
+
+        .shortcut-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--input-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .shortcut-title {
+            font-size: 13px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        footer {
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: var(--subtext-color);
+            border-top: 1px solid var(--input-border);
+        }
+
+        .footer-left, .footer-right {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-link {
+            color: var(--subtext-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="badge-pill">🛡️ Ad-Free &amp; Privacy-First</span>
+        <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">🌙 Theme</button>
+    </header>
+
+    <div class="main-container">
+        <div class="logo-container">
+            <div class="logo-text">
+                <span class="logo-blue">A</span><span class="logo-red">e</span><span class="logo-yellow">r</span><span class="logo-blue">i</span><span class="logo-green">s</span>
+            </div>
+            <div class="logo-sub">
+                <span>Fast • Zero Ads • Resource Efficient</span>
+            </div>
+        </div>
+
+        <div class="search-box-wrapper">
+            <form id="searchForm" onsubmit="handleSearch(event)">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                    </svg>
+                    <input type="text" id="queryInput" class="search-input" placeholder="Search the web ad-free or type a URL..." autocomplete="off" autofocus oninput="onQueryInput(this.value)">
+                    <svg class="clear-icon" id="clearBtn" viewBox="0 0 24 24" onclick="clearQuery()">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </div>
+            </form>
+            <div class="suggestions-dropdown" id="suggestionsBox"></div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="executeSearch('all')">Aeris Search</button>
+            <button class="btn" onclick="executeSearch('news')">Latest News</button>
+        </div>
+
+        <div class="shortcuts-grid" id="shortcutsGrid">
+            <a class="shortcut-card" onclick="navigateUrl('https://en.wikipedia.org')">
+                <div class="shortcut-icon" style="color:#000;">W</div>
+                <div class="shortcut-title">Wikipedia</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://github.com')">
+                <div class="shortcut-icon" style="color:#24292e;">🐙</div>
+                <div class="shortcut-title">GitHub</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://news.ycombinator.com')">
+                <div class="shortcut-icon" style="color:#ff6600;">Y</div>
+                <div class="shortcut-title">Hacker News</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://duckduckgo.com')">
+                <div class="shortcut-icon" style="color:#de5833;">🦆</div>
+                <div class="shortcut-title">DuckDuckGo</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://www.reddit.com')">
+                <div class="shortcut-icon" style="color:#ff4500;">🔴</div>
+                <div class="shortcut-title">Reddit</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://archive.org')">
+                <div class="shortcut-icon" style="color:#333;">🏛️</div>
+                <div class="shortcut-title">Archive.org</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://www.openstreetmap.org')">
+                <div class="shortcut-icon" style="color:#7ebc6f;">🗺️</div>
+                <div class="shortcut-title">Maps</div>
+            </a>
+            <a class="shortcut-card" onclick="navigateUrl('https://world.openfoodfacts.org')">
+                <div class="shortcut-icon" style="color:#309657;">🥗</div>
+                <div class="shortcut-title">OpenFacts</div>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-left">
+            <span>Powered by Native Chromium Engine</span>
+            <span>Zero Sponsored Ads</span>
+        </div>
+        <div class="footer-right">
+            <a class="footer-link" onclick="openPerformance()">Performance Dashboard</a>
+            <a class="footer-link" onclick="openSettings()">Privacy &amp; Settings</a>
+        </div>
+    </footer>
+
+    <script>
+        const input = document.getElementById('queryInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const suggestionsBox = document.getElementById('suggestionsBox');
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('themeBtn').innerText = isDark ? '☀️ Light' : '🌙 Dark';
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({ type: 'themeChanged', dark: isDark });
+            }
+        }
+
+        function clearQuery() {
+            input.value = '';
+            clearBtn.style.display = 'none';
+            suggestionsBox.style.display = 'none';
+            input.focus();
+        }
+
+        let debounceTimer = null;
+        function onQueryInput(val) {
+            clearBtn.style.display = val.trim().length > 0 ? 'block' : 'none';
+            if (val.trim().length < 2) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchSuggestions(val.trim());
+            }, 180);
+        }
+
+        function fetchSuggestions(query) {
+            if (window.chrome && window.chrome.webview) {
+                // Request suggestions from native host
+                window.chrome.webview.postMessage({ type: 'getSuggestions', query: query });
+            } else {
+                // Fallback direct JSONP/fetch if testing in standalone browser
+                fetch('https://duckduckgo.com/ac/?q=' + encodeURIComponent(query) + '&type=list')
+                    .then(res => res.json())
+                    .then(data => {
+                        renderSuggestions(data[1] || []);
+                    })
+                    .catch(() => {});
+            }
+        }
+
+        function renderSuggestions(list) {
+            if (!list || list.length === 0) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            suggestionsBox.innerHTML = '';
+            list.slice(0, 6).forEach(item => {
+                const text = typeof item === 'string' ? item : (item.phrase || item);
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `
+                    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    <span>${escapeHtml(text)}</span>
+                `;
+                div.onclick = () => {
+                    input.value = text;
+                    executeSearch('all');
+                };
+                suggestionsBox.appendChild(div);
+            });
+            suggestionsBox.style.display = 'flex';
+        }
+
+        // Host message listener
+        if (window.chrome && window.chrome.webview) {
+            window.chrome.webview.addEventListener('message', event => {
+                const msg = event.data;
+                if (msg.type === 'suggestionsResult') {
+                    renderSuggestions(msg.suggestions);
+                }
+            });
+        }
+
+        function handleSearch(e) {
+            e.preventDefault();
+            executeSearch('all');
+        }
+
+        function executeSearch(category) {
+            const val = input.value.trim();
+            if (!val) return;
+
+            // Direct URL detection (e.g., github.com, http://, https://, localhost:8080)
+            const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/i;
+            const isLocalhost = /^(https?:\/\/)?localhost(:\d+)?(\/.*)?$/i;
+
+            if (urlPattern.test(val) || isLocalhost.test(val)) {
+                let target = val;
+                if (!/^https?:\/\//i.test(target)) {
+                    target = 'https://' + target;
+                }
+                navigateUrl(target);
+                return;
+            }
+
+            // Otherwise, send search query to host
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({
+                    type: 'performSearch',
+                    query: val,
+                    category: category || 'all'
+                });
+            } else {
+                window.location.href = 'https://duckduckgo.com/?q=' + encodeURIComponent(val);
+            }
+        }
+
+        function navigateUrl(url) {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({ type: 'navigate', url: url });
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        function openPerformance() {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({ type: 'openPerformance' });
+            }
+        }
+
+        function openSettings() {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({ type: 'openSettings' });
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                "'": '&#39;',
+                '"': '&quot;'
+            }[tag] || tag));
+        }
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                suggestionsBox.style.display = 'none';
+            }, 180);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box-wrapper')) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+

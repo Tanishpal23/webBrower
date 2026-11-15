@@ -1,0 +1,54 @@
+# ==============================================================================
+# Aeris Browser - Git Ignore
+# ==============================================================================
+
+# Build Output & Binaries
+*.exe
+*.pdb
+*.obj
+*.ilk
+*.exp
+*.lib
+
+# Root DLLs (copied from lib/ by build.bat at compile time)
+/Microsoft.Web.WebView2.Core.dll
+/Microsoft.Web.WebView2.WinForms.dll
+/WebView2Loader.dll
+
+# Preserve essential dependency assemblies in lib/
+!lib/
+!lib/*.dll
+
+# Runtime User Data, Sessions, and Cache
+UserData/
+AerisUserData/
+*Incognito*
+*.tmp
+*.log
+search_results.html
+last_search.html
+session.json
+history.json
+bookmarks.json
+
+# Python & Temporary Caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.swp
+*~
+
+# IDE & Editor files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS Generated Files
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+.DS_Store

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aeris Search Results</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #202124;
+            --subtext-color: #4d5156;
+            --link-color: #1a0dab;
+            --link-visited: #681da8;
+            --url-color: #202124;
+            --input-bg: #ffffff;
+            --input-border: #dfe1e5;
+            --input-shadow: rgba(32, 33, 36, 0.2);
+            --card-border: #dadce0;
+            --tab-active: #1a73e8;
+            --badge-bg: #e6f4ea;
+            --badge-text: #137333;
+            --instant-card-bg: #f8f9fa;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #202124;
+                --text-color: #e8eaed;
+                --subtext-color: #bdc1c6;
+                --link-color: #8ab4f8;
+                --link-visited: #c58af9;
+                --url-color: #dadce0;
+                --input-bg: #303134;
+                --input-border: #5f6368;
+                --input-shadow: rgba(0, 0, 0, 0.45);
+                --card-border: #3c4043;
+                --tab-active: #8ab4f8;
+                --badge-bg: #133a23;
+                --badge-text: #81c995;
+                --instant-card-bg: #303134;
+            }
+        }
+
+        body.dark-mode {
+            --bg-color: #202124;
+            --text-color: #e8eaed;
+            --subtext-color: #bdc1c6;
+            --link-color: #8ab4f8;
+            --link-visited: #c58af9;
+            --url-color: #dadce0;
+            --input-bg: #303134;
+            --input-border: #5f6368;
+            --input-shadow: rgba(0, 0, 0, 0.45);
+            --card-border: #3c4043;
+            --tab-active: #8ab4f8;
+            --badge-bg: #133a23;
+            --badge-text: #81c995;
+            --instant-card-bg: #303134;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            border-bottom: 1px solid var(--card-border);
+            padding: 12px 24px 0 24px;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 12px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            user-select: none;
+            letter-spacing: -1px;
+        }
+
+        .logo-blue { color: #4285f4; }
+        .logo-red { color: #ea4335; }
+        .logo-yellow { color: #fbbc05; }
+        .logo-green { color: #34a853; }
+
+        .search-form {
+            flex: 1;
+            max-width: 692px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            height: 44px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 22px;
+            padding: 0 16px;
+            box-shadow: 0 1px 3px var(--input-shadow);
+        }
+
+        .search-input {
+            flex: 1;
+            height: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            color: var(--text-color);
+        }
+
+        .search-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 4px;
+        }
+
+        .search-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #4285f4;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 24px;
+            margin-left: 124px;
+        }
+
+        .nav-tab {
+            padding: 10px 4px;
+            font-size: 13px;
+            color: var(--subtext-color);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.15s;
+        }
+
+        .nav-tab:hover {
+            color: var(--tab-active);
+        }
+
+        .nav-tab.active {
+            color: var(--tab-active);
+            border-bottom-color: var(--tab-active);
+        }
+
+        .results-container {
+            max-width: 692px;
+            margin-left: 148px;
+            padding: 16px 20px 48px 0;
+        }
+
+        @media (max-width: 900px) {
+            .nav-tabs { margin-left: 0; }
+            .results-container { margin-left: 24px; max-width: calc(100% - 48px); }
+        }
+
+        .results-stats {
+            font-size: 13px;
+            color: var(--subtext-color);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ad-free-badge {
+            background-color: var(--badge-bg);
+            color: var(--badge-text);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* Instant Answer Card */
+        .instant-card {
+            background-color: var(--instant-card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 24px;
+        }
+
+        .instant-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .instant-desc {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-color);
+        }
+
+        .instant-source {
+            font-size: 12px;
+            color: var(--subtext-color);
+            margin-top: 10px;
+        }
+
+        /* Web Results */
+        .result-card {
+            margin-bottom: 28px;
+        }
+
+        .result-url-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .result-favicon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #dadce0;
+        }
+
+        .result-domain {
+            font-size: 12px;
+            color: var(--url-color);
+            text-decoration: none;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 400;
+            line-height: 1.3;
+            margin-bottom: 4px;
+        }
+
+        .result-title a {
+            color: var(--link-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .result-title a:hover {
+            text-decoration: underline;
+        }
+
+        .result-title a:visited {
+            color: var(--link-visited);
+        }
+
+        .result-snippet {
+            font-size: 14px;
+            line-height: 1.55;
+            color: var(--subtext-color);
+            word-wrap: break-word;
+        }
+
+        /* Images Grid */
+        .images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .image-card {
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--instant-card-bg);
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .image-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--input-shadow);
+        }
+
+        .image-thumbnail {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            background: #e0e0e0;
+        }
+
+        .image-meta {
+            padding: 8px 10px;
+        }
+
+        .image-title {
+            font-size: 12px;
+            color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .image-source {
+            font-size: 11px;
+            color: var(--subtext-color);
+            margin-top: 2px;
+        }
+
+        /* News Cards */
+        .news-card {
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 18px;
+            margin-bottom: 18px;
+        }
+
+        .news-publisher {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--subtext-color);
+            margin-bottom: 4px;
+        }
+
+        /* Videos Cards */
+        .video-card {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .video-thumb-wrapper {
+            position: relative;
+            width: 160px;
+            height: 90px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #202124;
+            flex-shrink: 0;
+        }
+
+        .video-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            font-size: 11px;
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
+
+        .video-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .page-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--link-color);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-btn:hover {
+            background: var(--instant-card-bg);
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <a class="logo" onclick="goHome()">
+                <span class="logo-blue">A</span><span class="logo-red">e</span><span class="logo-yellow">r</span><span class="logo-blue">i</span><span class="logo-green">s</span>
+            </a>
+            <form class="search-form" onsubmit="handleSearch(event)">
+                <div class="search-box">
+                    <input type="text" id="searchInput" class="search-input" value="{{QUERY}}" autocomplete="off">
+                    <button type="submit" class="search-btn">
+                        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="nav-tabs">
+            <a class="nav-tab {{ACTIVE_ALL}}" onclick="switchCategory('all')">🌐 All</a>
+            <a class="nav-tab {{ACTIVE_IMAGES}}" onclick="switchCategory('images')">🖼️ Images</a>
+            <a class="nav-tab {{ACTIVE_VIDEOS}}" onclick="switchCategory('videos')">🎬 Videos</a>
+            <a class="nav-tab {{ACTIVE_NEWS}}" onclick="switchCategory('news')">📰 News</a>
+        </div>
+    </header>
+
+    <main class="results-container">
+        <div class="results-stats">
+            <span>{{RESULT_STATS}}</span>
+            <span class="ad-free-badge">🛡️ Zero Ads &amp; Trackers</span>
+        </div>
+
+        {{INSTANT_CARD_HTML}}
+
+        <div id="resultsContent">
+            {{RESULTS_HTML}}
+        </div>
+
+        <div class="pagination">
+            {{PAGINATION_HTML}}
+        </div>
+    </main>
+
+    <script>
+        function goHome() {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({ type: 'goHome' });
+            } else {
+                window.location.href = 'about:home';
+            }
+        }
+
+        function handleSearch(e) {
+            e.preventDefault();
+            const val = document.getElementById('searchInput').value.trim();
+            if (!val) return;
+            triggerSearch(val, '{{CURRENT_CATEGORY}}', 1);
+        }
+
+        function switchCategory(cat) {
+            const val = document.getElementById('searchInput').value.trim();
+            triggerSearch(val, cat, 1);
+        }
+
+        function goToPage(page) {
+            const val = document.getElementById('searchInput').value.trim();
+            triggerSearch(val, '{{CURRENT_CATEGORY}}', page);
+        }
+
+        function triggerSearch(query, category, page) {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({
+                    type: 'performSearch',
+                    query: query,
+                    category: category,
+                    page: page
+                });
+            }
+        }
+
+        function navigateUrl(url) {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.postMessage({ type: 'navigate', url: url });
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+</body>
+</html>
+
